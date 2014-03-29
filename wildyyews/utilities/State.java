@@ -14,14 +14,6 @@ public enum State {
 
 	public static State state;
 
-	public static State getState() {
-		return state;
-	}
-
-	public static void setState(State s) {
-		state = s;
-	}
-
 	public static State findCurrentState() {
 		if(Areas.lumbridge.contains(Player.getPosition()) || Inventory.getCount(995) < 2000) {
 			if(Inventory.getCount(new String[] { "Coins" }) < 2000){
@@ -58,5 +50,13 @@ public enum State {
 			return CLICK_TREE;
 		}
 		return state;
+	}
+	
+	public static State getState() {
+		return state;
+	}
+	
+	public static void setState(State s) {
+		state = s;
 	}
 }

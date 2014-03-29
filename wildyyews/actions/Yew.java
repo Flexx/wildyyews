@@ -12,10 +12,15 @@ import org.tribot.api2007.types.RSObject;
 import scripts.wildyyews.resources.Tiles;
 
 public class Yew {
+	
+	public static RSObject getTree() {
+		RSObject[] yew = Objects.findNearest(50, "Yew");
+		return (yew.length > 0) ? yew[0] : null;
+	}
 
 	public static void clickTree(){
-		RSObject[] yew = Objects.findNearest(50, "Yew");
-		if(yew.length > 0){
+		RSObject yew = getTree();
+		if(yew != null){
 			if(ChooseOption.isOpen()){
 				if(ChooseOption.isOptionValid("Chop")){
 					if(ChooseOption.select("Chop")){
@@ -28,20 +33,20 @@ public class Yew {
 					ChooseOption.close();
 				}
 			}else{
-				if(yew[0].isOnScreen()){
+				if(yew.isOnScreen()){
 					if(General.random(1,5) == 1){
-						if(yew[0].click("Chop down")){
+						if(yew.click("Chop down")){
 							General.sleep(100,200);
 							while(Player.isMoving()){
 								General.sleep(100,200);
 							}
 						}
 					}else{
-						yew[0].hover();
+						yew.hover();
 						Mouse.click(3);
 					}
 				}else{
-					Walking.walkTo(yew[0].getPosition());
+					Walking.walkTo(yew.getPosition());
 				}
 			}
 		}
@@ -64,8 +69,6 @@ public class Yew {
 					Camera.setCameraRotation(General.random(1,360));
 				}
 			}
-
 		}
 	}
-
 }
