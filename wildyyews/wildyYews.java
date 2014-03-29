@@ -4,7 +4,11 @@ import java.awt.*;
 import org.tribot.api.General;
 import org.tribot.api.input.Mouse;
 import org.tribot.api2007.Camera;
+import org.tribot.api2007.Inventory;
+import org.tribot.api2007.Login;
+import org.tribot.api2007.Player;
 import org.tribot.api2007.Walking;
+import org.tribot.api2007.types.RSArea;
 import org.tribot.script.Script;
 import org.tribot.script.ScriptManifest;
 import org.tribot.script.interfaces.MessageListening07;
@@ -14,7 +18,8 @@ import scripts.wildyyews.actions.Gate;
 import scripts.wildyyews.actions.Items;
 import scripts.wildyyews.actions.Pker;
 import scripts.wildyyews.actions.Yew;
-import scripts.wildyyews.utilities.State;
+import scripts.wildyyews.resources.Areas;
+import scripts.wildyyews.resources.Data;
 import scripts.wildyyews.utilities.WorldHopper;
 
 @ScriptManifest(authors = {"Flexx"}, version = 1.0, category = "Woodcutting", name = "Resource Area Yews", description = "Cuts yews in the Wilderness Resource Area")
@@ -27,46 +32,44 @@ public class wildyYews extends Script implements Painting, MessageListening07 {
 		return true;
 	}
 
+	private boolean atArea(RSArea a){
+		return a.contains(Player.getPosition());
+	}
+
 	@Override
 	public void run() {
 		if(onStart()){
-			State.setState(State.SLEEP);
-			while(!State.getState().equals(State.TERMINATE)){
-				switch(State.getState()) {
-
-				case WORLD_HOP :
+			while(true){
+				if(Login.getLoginState() == Login.STATE.LOGINSCREEN){
 					WorldHopper.hop();
-					break;
-					
-				case ESCAPE :
-					Pker.logout();
-					break;
-					
-				case NOTING :
-					Items.note();
-					break;
-					
-				case OUT_OF_AREA :
-					Gate.openGate();
-					break;
-					
-				case CLICK_TREE :
-					Yew.cut();
-					break;
-					
-				default : break;
+				}
+				
+				if(atArea(Areas.resources)){
+					if(Pker.pkerIsNear()){
+						Pker.logout();
+					}else{
+						if(Inventory.isFull()){
+							Items.note();
+						}else{
+							Yew.cutTrees();
+						}
+					}
 				}
 
-				if(!State.getState().equals(State.TERMINATE)) {
-					State.setState(State.findCurrentState());
-					General.sleep(150, 250);
+				if(atArea(Areas.out)){
+					Gate.openGate();
+				}
+
+				if(atArea(Areas.lumbridge)){
+					println("We died. Deathwalking is not supported at this time.");
+					stopScript();
 				}
 			}
 		}
 	}
 
 	public void onPaint(Graphics g1) {
-
+		//Painting.init();
 	}
 
 
@@ -90,7 +93,9 @@ public class wildyYews extends Script implements Painting, MessageListening07 {
 
 	@Override
 	public void serverMessageReceived(String arg0) {
-
+		if(arg0.contains("cut")){
+			Data.logsCut++;
+		}
 	}
 
 	@Override
